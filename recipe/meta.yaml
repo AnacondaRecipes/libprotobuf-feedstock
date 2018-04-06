@@ -22,14 +22,16 @@ build:
 
 requirements:
   build:
-    - toolchain
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
     - cmake              # [win]
     - autoconf           # [unix]
     - automake           # [unix]
     - libtool            # [unix]
     - pkg-config         # [unix]
-    - zlib 1.2.11
     - unzip              # [unix]
+  host:
+    - zlib 1.2.11
   run:
     - zlib 1.2.11
 
