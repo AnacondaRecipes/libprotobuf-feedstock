@@ -19,6 +19,10 @@ source:
 build:
   number: 0
   skip: true  # [win and py35]
+  run_exports:
+    # breaks backwards compatibility and new SONAME each minor release
+    # https://abi-laboratory.pro/tracker/timeline/protobuf/
+    - {{ pin_subpackage('libprotobuf', max_pin='x.x') }}
 
 requirements:
   build:
