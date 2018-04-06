@@ -30,6 +30,7 @@ requirements:
     - libtool            # [unix]
     - pkg-config         # [unix]
     - unzip              # [unix]
+    - make               # [unix]
   host:
     - zlib
 
