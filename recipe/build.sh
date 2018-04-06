@@ -8,7 +8,17 @@ then
     export LIBS="-lc++"
 fi
 
-./autogen.sh
+# required to pick up conda installed zlib
+export CPPFLAGS="${CPPFLAGS} -I${PREFIX}/include"
+export LDFLAGS="${LDFLAGS} -L${PREFIX}/lib"
+
+# Build configure/Makefile as they are not present.
+aclocal
+libtoolize
+autoconf
+autoreconf -i
+automake --add-missing
+
 ./configure --prefix="${PREFIX}" \
             --with-pic \
             --enable-shared \
