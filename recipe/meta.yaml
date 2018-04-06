@@ -9,6 +9,8 @@ package:
 source:
   - url: https://github.com/google/protobuf/archive/v{{ version }}/{{ name }}-v{{ version }}.tar.gz
     sha256: {{ sha256 }}
+    patches:
+      - 2614.patch
   - url: https://github.com/google/googlemock/archive/release-1.7.0.zip
     fn: googlemock-release-1.7.0.zip
     folder: gmock
