@@ -11,6 +11,7 @@ source:
     sha256: {{ sha256 }}
     patches:
       - 2614.patch
+      - 0001-remove-Werror-from-test-flags.patch  # [ppc64le]
   - url: https://github.com/google/googlemock/archive/release-1.7.0.zip
     fn: googlemock-release-1.7.0.zip
     folder: gmock
