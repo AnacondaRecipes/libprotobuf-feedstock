@@ -1,4 +1,4 @@
-{% set version = "3.6.1" %}
+{% set version = "3.7.1" %}
 
 package:
   name: libprotobuf
@@ -6,12 +6,11 @@ package:
 
 source:
   - url: https://github.com/google/protobuf/archive/v{{ version }}/libprotobuf-v{{ version }}.tar.gz
-    sha256: 3d4e589d81b2006ca603c1ab712c9715a76227293032d05b26fca603f90b3f5b
+    sha256: f1748989842b46fa208b2a6e4e2785133cfcc3e4d43c17fecb023733f0f5443f
     patches:
-      - 4854.patch
       - 0001-remove-Werror-from-test-flags.patch  # [ppc64le]
-  # these are git submodules from the 3.6.1 release
-  # https://github.com/google/protobuf/tree/v3.6.1/third_party
+  # these are git submodules from the 3.7.1 release
+  # https://github.com/google/protobuf/tree/v3.7.1/third_party
   - url: https://github.com/google/benchmark/archive/5b7683f49e1e9223cf9927b24f6fd3d6bd82e3f8.zip
     sha256: 866d3c8cadb3323251d4fe0e989ea0df51f30660badb73dad0f2d11e5bf1770f
     folder: third_party/benchmark
@@ -25,21 +24,21 @@ build:
   skip: True  # [win and vc<14]
   run_exports:
     # breaks backwards compatibility and new SONAME each minor release
-    # 3.6.1 also appears to change SONAME from 3.6.0*
     # https://abi-laboratory.pro/tracker/timeline/protobuf/
-    - {{ pin_subpackage('libprotobuf', max_pin='x.x.x') }}
+    # One exception was that 3.6.1 was incompatible with 3.6.0
+    - {{ pin_subpackage('libprotobuf', max_pin='x.x') }}
 
 requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - cmake              # [win]
-    - autoconf           # [unix]
-    - automake           # [unix]
-    - libtool            # [unix]
-    - pkg-config         # [unix]
-    - unzip              # [unix]
-    - make               # [unix]
+    - cmake  # [win]
+    - autoconf  # [not win]
+    - automake  # [not win]
+    - libtool  # [not win]
+    - pkg-config  # [not win]
+    - unzip  # [not win]
+    - make  # [not win]
   host:
     - zlib
   run:
@@ -48,10 +47,11 @@ requirements:
 test:
   commands:
     - protoc --help
-    - test -f ${PREFIX}/lib/libprotobuf.a                           # [unix]
-    - test -f ${PREFIX}/lib/libprotobuf.dylib                       # [osx]
-    - test -f ${PREFIX}/lib/libprotobuf.so                          # [linux]
-    - if not exist %PREFIX%\\Library\\lib\\libprotobuf.lib exit 1   # [win]
+    - test -f ${PREFIX}/lib/libprotobuf.a  # [not win]
+    - test -f ${PREFIX}/lib/libprotobuf${SHLIB_EXT}  # [not win]
+    - if not exist %PREFIX%\\Library\\lib\\libprotoc.lib exit 1  # [win]
+    - if not exist %PREFIX%\\Library\\lib\\libprotobuf.lib exit 1  # [win]
+    - if not exist %PREFIX%\\Library\\lib\\libprotobuf-lite.lib exit 1  # [win]
 
 about:
   home: https://developers.google.com/protocol-buffers/
@@ -74,3 +74,4 @@ extra:
     - ocefpaf
     - wesm
     - hajapy
+    - xhochy

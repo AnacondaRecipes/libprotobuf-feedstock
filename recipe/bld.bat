@@ -1,13 +1,10 @@
 :: Setup directory structure per protobuf's instructions.
 cd cmake
 if errorlevel 1 exit 1
-mkdir build
+
+mkdir build-shared
 if errorlevel 1 exit 1
-cd build
-if errorlevel 1 exit 1
-mkdir release
-if errorlevel 1 exit 1
-cd release
+cd build-shared
 if errorlevel 1 exit 1
 
 :: Configure and install based on protobuf's instructions and other `bld.bat`s.
@@ -18,7 +15,8 @@ cmake -G "NMake Makefiles" ^
          -Dprotobuf_WITH_ZLIB=ON ^
          -Dprotobuf_BUILD_SHARED_LIBS=ON ^
          -Dprotobuf_MSVC_STATIC_RUNTIME=OFF ^
-         ../..
+         ..
+
 if errorlevel 1 exit 1
 nmake
 if errorlevel 1 exit 1
