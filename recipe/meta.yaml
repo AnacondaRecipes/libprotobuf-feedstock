@@ -8,7 +8,7 @@ source:
   - url: https://github.com/google/protobuf/archive/v{{ version }}/libprotobuf-v{{ version }}.tar.gz
     sha256: e8c7601439dbd4489fe5069c33d374804990a56c2f710e00227ee5d8fd650e67
     patches:
-      - 0001-remove-Werror-from-test-flags.patch  # [ppc64le or aarch64]
+      - 0001-remove-Werror-from-test-flags.patch  # [ppc64le or aarch64 or s390x]
   # these are git submodules from the 3.10.1 release
   # https://github.com/google/protobuf/tree/v3.10.1/third_party
   - url: https://github.com/google/benchmark/archive/5b7683f49e1e9223cf9927b24f6fd3d6bd82e3f8.tar.gz
