@@ -10,6 +10,7 @@ source:
     patches:
       - 0001-remove-Werror-from-test-flags.patch  # [ppc64le or aarch64 or s390x]
       - 0002-remove-failing-json-parser-test.patch  # [s390x]
+      - 0003-remove-large-output-test.patch.patch   # [s390x]
       # This issue gets fixed and then reintroduced often
       # https://github.com/protocolbuffers/protobuf/issues/7567
       #- issue-7567.patch
