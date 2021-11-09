@@ -6,7 +6,7 @@ package:
 
 source:
   - url: https://github.com/protocolbuffers/protobuf/archive/v{{ version }}/libprotobuf-v{{ version }}.tar.gz
-    sha256: 87407cd28e7a9c95d9f61a098a53cf031109d451a7763e7dd1253abf8b4df422
+    sha256: 5dc92703f811f94e2aa63bdab07ab749f28a094befa6cdfd5fe177f947590a48
     patches:
       - 0001-remove-Werror-from-test-flags.patch  # [ppc64le or aarch64 or s390x]
       - 0002-remove-failing-json-parser-test.patch  # [s390x]
@@ -19,10 +19,10 @@ source:
   # these are git submodules from the 3.10.1 release
   # https://github.com/protocolbuffers/protobuf/tree/v3.10.1/third_party
   - url: https://github.com/google/benchmark/archive/5b7683f49e1e9223cf9927b24f6fd3d6bd82e3f8.tar.gz
-    sha256: 87407cd28e7a9c95d9f61a098a53cf031109d451a7763e7dd1253abf8b4df422
+    sha256: 5dc92703f811f94e2aa63bdab07ab749f28a094befa6cdfd5fe177f947590a48
     folder: third_party/benchmark
   - url: https://github.com/google/googletest/archive/5ec7f0c4a113e2f18ac2c6cc7df51ad6afc24081.tar.gz
-    sha256: 87407cd28e7a9c95d9f61a098a53cf031109d451a7763e7dd1253abf8b4df422
+    sha256: 5dc92703f811f94e2aa63bdab07ab749f28a094befa6cdfd5fe177f947590a48
     folder: third_party/googletest
 
 build:
