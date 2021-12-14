@@ -79,6 +79,7 @@ outputs:
         - pkg-config  # [not win]
         - unzip  # [not win]
         - make  # [not win]
+        - patch  # [not win]
       host:
         - zlib    # [not win]
         - {{ pin_subpackage('libprotobuf', exact=True) }}  # [not win]
