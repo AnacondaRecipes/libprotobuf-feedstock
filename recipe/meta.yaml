@@ -33,6 +33,8 @@ outputs:
     script: build-shared.sh  # [unix]
     script: bld-shared.bat  # [win]
     build:
+      missing_dso_whitelist:  # [s390x]
+        - $RPATH/ld64.so.1    # [s390x]
       run_exports:
         # breaks backwards compatibility and new SONAME each minor release
         # https://abi-laboratory.pro/tracker/timeline/protobuf/
