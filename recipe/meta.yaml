@@ -50,7 +50,7 @@ outputs:
         - pkg-config  # [not win]
         - unzip  # [not win]
         - make  # [not win]
-        - patch  # [not win]
+        - patch  # [ppc64le or aarch64 or s390x]
       host:
         - zlib
       run:
