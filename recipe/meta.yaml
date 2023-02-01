@@ -1,4 +1,4 @@
-{% set version = "3.19.1" %}
+{% set version = "3.19.6" %}
 
 package:
   name: libprotobuf-suite
@@ -6,10 +6,10 @@ package:
 
 source:
   - url: https://github.com/protocolbuffers/protobuf/archive/v{{ version }}/libprotobuf-v{{ version }}.tar.gz
-    sha256: 87407cd28e7a9c95d9f61a098a53cf031109d451a7763e7dd1253abf8b4df422
+    sha256: 9a301cf94a8ddcb380b901e7aac852780b826595075577bb967004050c835056
     patches:
       - 0001-remove-Werror-from-test-flags.patch  # [ppc64le or aarch64 or s390x]
-      - 0002-remove-failing-json-parser-test.patch  # [s390x]
+      # - 0002-remove-failing-json-parser-test.patch  # [s390x]
       # our build machine does not have enough memory for this test.
       # see: https://github.com/protocolbuffers/protobuf/issues/8082
       # - 0003-remove-large-output-test.patch         # [s390x]
@@ -26,13 +26,15 @@ source:
     folder: third_party/googletest
 
 build:
-  number: 1
+  number: 0
 
 outputs:
   - name: libprotobuf
     script: build-shared.sh  # [unix]
     script: bld-shared.bat  # [win]
     build:
+      missing_dso_whitelist:  # [s390x]
+        - $RPATH/ld64.so.1    # [s390x]
       run_exports:
         # breaks backwards compatibility and new SONAME each minor release
         # https://abi-laboratory.pro/tracker/timeline/protobuf/
@@ -50,7 +52,7 @@ outputs:
         - pkg-config  # [not win]
         - unzip  # [not win]
         - make  # [not win]
-        - patch  # [not win]
+        - patch  # [ppc64le or aarch64 or s390x]
       host:
         - zlib
       run:
@@ -79,7 +81,7 @@ outputs:
         - pkg-config  # [not win]
         - unzip  # [not win]
         - make  # [not win]
-        - patch  # [not win]
+        - patch # [ppc64le or aarch64 or s390x]
       host:
         - zlib    # [not win]
         - {{ pin_subpackage('libprotobuf', exact=True) }}  # [not win]
@@ -110,7 +112,6 @@ about:
     think XML, but smaller, faster, and simpler.
   dev_url: https://github.com/protocolbuffers/protobuf
   doc_url: https://developers.google.com/protocol-buffers/
-  doc_source_url: https://github.com/protocolbuffers/protobuf/releases
 
 extra:
   recipe-maintainers:
