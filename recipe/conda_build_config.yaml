@@ -1,4 +1,5 @@
-#c_compiler_version:         # [linux and ppc64le]
-#  - 8                       # [linux and ppc64le]
-#cxx_compiler_version:       # [linux and ppc64le]
-#  - 8                       # [linux and ppc64le]
+
+CONDA_BUILD_SYSROOT:       # [osx and x86]
+  - /opt/MacOSX10.13.sdk   # [osx and x86]
+macos_min_version:         # [osx and x86]
+  - 10.13                  # [osx and x86]
