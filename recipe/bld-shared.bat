@@ -1,10 +1,4 @@
-:: Setup directory structure per protobuf's instructions.
-cd cmake
-if errorlevel 1 exit 1
-
-mkdir build-shared
-if errorlevel 1 exit 1
-cd build-shared
+pushd build-shared
 if errorlevel 1 exit 1
 
 :: Configure and install based on protobuf's instructions and other `bld.bat`s.
@@ -15,11 +9,11 @@ cmake -G "Ninja" ^
          -DBUILD_SHARED_LIBS=ON ^
          -Dprotobuf_MSVC_STATIC_RUNTIME=OFF ^
          -DABSL_PROPAGATE_CXX_STD=ON ^
-         -Dprotobuf_ABSL_PROVIDER=package ^
-         -Dprotobuf_JSONCPP_PROVIDER=package ^
+         -Dprotobuf_ABSL_PROVIDER="package" ^
+         -Dprotobuf_JSONCPP_PROVIDER="package" ^
+         -Dprotobuf_USE_EXTERNAL_GTEST=ON ^
          ..
-
 if errorlevel 1 exit 1
 cmake --build . --target install --config Release
 if errorlevel 1 exit 1
-
+popd

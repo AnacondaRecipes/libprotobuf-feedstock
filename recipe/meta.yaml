@@ -73,7 +73,7 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
-        - cmake  # [win]
+        - cmake
         - ninja  # [win]
         - make  # [not win]
       host:
