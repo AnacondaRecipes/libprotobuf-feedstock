@@ -1,4 +1,4 @@
-{% set version = "3.20.3" %}
+{% set version = "4.24.1" %}
 
 package:
   name: libprotobuf-suite
@@ -6,33 +6,30 @@ package:
 
 source:
   - url: https://github.com/protocolbuffers/protobuf/archive/v{{ version }}/libprotobuf-v{{ version }}.tar.gz
-    sha256: 9c0fd39c7a08dff543c643f0f4baf081988129a411b977a07c46221793605638
-    patches:  # [linux]
-      # We don't want the build to fail because of -Werror being used during
-      # make check.
-      - 0001-remove-Werror-from-test-flags.patch  # [linux]
-      # - 0002-remove-failing-json-parser-test.patch  # [s390x]
-      # our build machine does not have enough memory for this test.
-      # see: https://github.com/protocolbuffers/protobuf/issues/8082
-      # - 0003-remove-large-output-test.patch         # [s390x]
-      # This issue gets fixed and then reintroduced often
-      # https://github.com/protocolbuffers/protobuf/issues/7567
-      #- issue-7567.patch
+    sha256: 6a66ed430c8a5c14a4a8ae75bd4d72a155d9444ea1a752355bbb28ea5c414bda
   # these are git submodules from the {{ version }} release
   # https://github.com/protocolbuffers/protobuf/tree/v{{ version }}/third_party
-  - url: https://github.com/google/benchmark/archive/5b7683f49e1e9223cf9927b24f6fd3d6bd82e3f8.tar.gz
-    sha256: 5dc92703f811f94e2aa63bdab07ab749f28a094befa6cdfd5fe177f947590a48
-    folder: third_party/benchmark
-  - url: https://github.com/google/googletest/archive/5ec7f0c4a113e2f18ac2c6cc7df51ad6afc24081.tar.gz
-    sha256: 0e2f36e8e403c125fd0ab02171bdb786d3b6b3875b6ccf3b2eb7969be8faecd0
+  
+  # this submodule is replaced by host dependency
+  # - url: https://github.com/abseil/abseil-cpp/archive/c2435f8342c2d0ed8101cb43adfd605fdc52dca2.tar.gz
+  #  sha256: 9892836ab0d3f099b8c15076c6f4168144f452d097bd49da215fe0df36a2d48c
+  #  folder: third_party/abseil-cpp
+  
+  # this submodule cannot be replaced by host dependency because lack of such option in CMakeList.txt
+  - url: https://github.com/google/googletest/archive/4c9a3bb62bf3ba1f1010bf96f9c8ed767b363774.tar.gz
+    sha256: ea54c9845568cb31c03f2eddc7a40f7f83912d04ab977ff50ec33278119548dd
     folder: third_party/googletest
+
+  # this submodule is replaced by host dependency
+  #- url: https://github.com/open-source-parsers/jsoncpp/archive/9059f5cad030ba11d37818847443a53918c327b1.tar.gz
+  #  sha256: e7a12f50c2125abc9e4b2a38f399393503b6eebd5b4ab75ebb7df1664e768ce7
+  #  folder: third_party/jsoncpp
 
 build:
   number: 0
 
 requirements:
   build:  # [linux or (osx and arm64)]
-    - patch  # [linux]
     - sed  # [osx and arm64]
 
 outputs:
@@ -51,17 +48,13 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
-        - cmake  # [win]
-        - ninja  # [win]
-        - autoconf  # [not win]
-        - automake  # [not win]
-        - libtool  # [not win]
-        - pkg-config  # [not win]
-        - unzip  # [not win]
+        - cmake
         - make  # [not win]
-        - sed  # [osx and arm64]
+        - ninja  # [win]
       host:
         - zlib
+        - abseil-cpp 20230802.0
+        - jsoncpp 1.9.4
       run:
         - zlib
     test:
@@ -82,11 +75,6 @@ outputs:
         - {{ compiler('cxx') }}
         - cmake  # [win]
         - ninja  # [win]
-        - autoconf  # [not win]
-        - automake  # [not win]
-        - libtool  # [not win]
-        - pkg-config  # [not win]
-        - unzip  # [not win]
         - make  # [not win]
       host:
         - zlib    # [not win]

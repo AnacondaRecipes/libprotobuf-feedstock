@@ -12,10 +12,13 @@ cmake -G "Ninja" ^
          -DCMAKE_BUILD_TYPE=Release ^
          -DCMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
          -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
-         -Dprotobuf_WITH_ZLIB=ON ^
-         -Dprotobuf_BUILD_SHARED_LIBS=OFF ^
+         -DBUILD_SHARED_LIBS=OFF ^
          -Dprotobuf_MSVC_STATIC_RUNTIME=OFF ^
+         -DABSL_PROPAGATE_CXX_STD=ON ^
+         -Dprotobuf_ABSL_PROVIDER=package ^
+         -Dprotobuf_JSONCPP_PROVIDER=package ^
          ..
+
 if errorlevel 1 exit 1
 cmake --build . --target install --config Release
 if errorlevel 1 exit 1
