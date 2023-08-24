@@ -1,18 +1,14 @@
-# keep this without major version to let the bot pick it up
-{% set version = "23.4" %}
-# protobuf doesn't add the major version in the tag, it's defined per language in
-# https://github.com/protocolbuffers/protobuf/blob/main/version.json
-{% set major = "4" %}
 
+{% set version = "4.23.4" %}
 {% set libraries = ["libprotoc", "libprotobuf", "libprotobuf-lite"] %}
 
 package:
   name: libprotobuf-split
-  version: {{ major ~ "." ~ version }}
+  version: {{ version }}
 
 source:
-  - url: https://github.com/protocolbuffers/protobuf/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: a700a49470d301f1190a487a923b5095bf60f08f4ae4cac9f5f7c36883d17971
+  - url: https://github.com/protocolbuffers/protobuf/archive/refs/tags/v{{ version }}.tar.gz
+    sha256: 5f3cd52d6e5062071d99da57a96ea87e39bc020d6d25748001d919c474a4d8ed
     patches:
       - patches/0001-use-consistent-cmake-location.patch
       - patches/0002-set-static-lib-extension-on-windows.patch
@@ -40,6 +36,7 @@ outputs:
         - {{ pin_subpackage('libprotobuf', max_pin='x.x.x') }}
       ignore_run_exports_from:
         - jsoncpp
+        - gtest
     requirements:
       build:
         - {{ compiler('c') }}
@@ -108,6 +105,7 @@ outputs:
         - Library/lib/cmake/protobuf/   # [win]
       ignore_run_exports_from:
         - jsoncpp
+        - gtest
     requirements:
       build:
         - {{ compiler('c') }}
