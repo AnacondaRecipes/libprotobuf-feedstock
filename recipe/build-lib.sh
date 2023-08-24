@@ -35,7 +35,6 @@ else
 fi
 
 cmake -G "Ninja" \
-    ${CMAKE_ARGS} \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_STANDARD=17 \
     -Dprotobuf_ABSL_PROVIDER="package" \
@@ -50,6 +49,6 @@ cmake --build .
 #ctest is too broad and does not have an option to exclude specific gtest test cases, therefore calling gtest directly instead
 #ctest --progress --output-on-failure
 ./lite-test
-./tests --gtest_filter="IoTest.*-IoTest.LargeOutput"    #LargeOutput failing because lack of resources
+./tests --gtest_filter="IoTest.*-IoTest.LargeOutput"    #LargeOutput failing because lack of resources on build agents
 
 cmake --install .
