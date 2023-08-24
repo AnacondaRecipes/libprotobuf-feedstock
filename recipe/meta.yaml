@@ -46,10 +46,12 @@ outputs:
         - {{ compiler('cxx') }}
         - cmake
         - ninja
+        - patch                # [unix]
+        - m2-patch             # [win]
       host:
         - gtest 1.14.0
         - jsoncpp 1.9.4
-        - abseil-cpp
+        - abseil-cpp 20230802
         - zlib
       run:
         - __osx >={{ MACOSX_DEPLOYMENT_TARGET }}  # [osx and x86_64]
@@ -91,7 +93,8 @@ outputs:
 
         # more CMake integration
         - cd cmake_test 
-        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release .   # [unix]
+        - cmake -GNinja $CMAKE_ARGS .                 # [unix]
+        # windows cannot link with mix debug and release version, so set to Release
         - cmake -GNinja -DCMAKE_BUILD_TYPE=Release .  # [win]
         - cmake --build .
 
@@ -114,7 +117,7 @@ outputs:
       host:
         - gtest 1.14.0
         - jsoncpp 1.9.4
-        - abseil-cpp
+        - abseil-cpp 20230802
         - zlib
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run:
@@ -138,12 +141,13 @@ outputs:
 
         # more CMake integration
         - cd cmake_test
-        - cmake -GNinja -DCMAKE_BUILD_TYPE=Release .   # [unix]
+        - cmake -GNinja $CMAKE_ARGS .                 # [unix]
+        # windows cannot link with mix debug and release version, so set to Release
         - cmake -GNinja -DCMAKE_BUILD_TYPE=Release .  # [win]
         - cmake --build .
 
 about:
-  home: https://developers.google.com/protocol-buffers/
+  home: https://protobuf.dev/ 
   license: BSD-3-Clause
   license_family: BSD
   license_file: LICENSE
@@ -153,8 +157,7 @@ about:
     platform-neutral, extensible mechanism for serializing structured data-
     think XML, but smaller, faster, and simpler.
   dev_url: https://github.com/protocolbuffers/protobuf
-  doc_url: https://developers.google.com/protocol-buffers/
-  doc_source_url: https://github.com/protocolbuffers/protobuf/releases
+  doc_url: https://protobuf.dev/  
 
 extra:
   recipe-maintainers:

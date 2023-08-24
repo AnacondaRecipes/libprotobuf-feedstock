@@ -14,6 +14,3 @@ cxx_compiler:  # [win]
 vc:                          # [win]
   - 16                       # [win]
 
-# manual pin because we're linking migrations
-abseil_cpp:
-  - 20230802
