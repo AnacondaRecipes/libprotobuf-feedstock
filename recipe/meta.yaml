@@ -51,8 +51,6 @@ outputs:
         - jsoncpp 1.9.4
         - abseil-cpp 20230802
         - zlib
-        #zstd required by cmake on testing
-        - zstd {{ zstd }}
       run:
         - __osx >={{ MACOSX_DEPLOYMENT_TARGET }}  # [osx and x86_64]
 
@@ -63,6 +61,8 @@ outputs:
         - {{ compiler('cxx') }}
         - cmake
         - ninja
+        - zstd
+
       files:
         - cmake_test/
       commands:
@@ -107,9 +107,9 @@ outputs:
         - lib/cmake/protobuf/           # [unix]
         - Library/lib/cmake/protobuf/   # [win]
       ignore_run_exports_from:
+        # jsoncpp not needed at runtime
         - jsoncpp
         - gtest
-        - zstd
     requirements:
       build:
         - {{ compiler('c') }}
@@ -121,8 +121,6 @@ outputs:
         - jsoncpp 1.9.4
         - abseil-cpp 20230802
         - zlib
-        #zstd required by cmake on testing
-        - zstd {{ zstd }}
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run:
         - {{ pin_subpackage('libprotobuf', exact=True) }}
@@ -134,6 +132,7 @@ outputs:
         - cmake
         - ninja
         - zlib
+        - zstd
       files:
         - cmake_test/
       commands:
