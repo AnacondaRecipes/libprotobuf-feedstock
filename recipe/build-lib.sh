@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex
 
+cd ${SRC_DIR}
+
 if [[ "$(uname)" == "Linux" ]]; then
     # protobuf uses PROTOBUF_OPT_FLAG to set the optimization level
     # unit test can fail if optmization above 0 are used.
