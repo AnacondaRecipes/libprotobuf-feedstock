@@ -36,8 +36,7 @@ build:
 requirements:
   build:  # [linux or (osx and arm64)]
     - patch  # [linux]
-    - sed  # [osx and arm64]
-
+  
 outputs:
   - name: libprotobuf
     script: build-lib.sh  # [unix]
@@ -59,16 +58,17 @@ outputs:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
         - cmake
-        - ninja
+        - ninja-base
       host:
-        - gtest
-        - jsoncpp
-        - libabseil
+        - gtest 1.14.0
+        - jsoncpp 1.9.4
+        - libabseil 20240116.2
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
-        - zlib
+        - zlib {{ zlib }}
       run:
-        - ucrt  # [win]
+        - zlib       # bounds through run_exports
+        - libabseil  # bounds through run_exports        
         # following google's C++ support policy, protobuf only support MacOS >=10.13, see:
         # https://github.com/google/oss-policies-info/blob/main/foundational-cxx-support-matrix.md
         # https://github.com/protocolbuffers/protobuf/blob/v24.0/Protobuf-C%2B%2B.podspec#L29
@@ -79,7 +79,7 @@ outputs:
         # https://discourse.cmake.org/t/questions-about-find-package-cli-msvc/6194
         - {{ compiler('cxx') }}
         - cmake
-        - ninja
+        - ninja-base
         - pkg-config
       files:
         - cmake_test/
@@ -128,15 +128,18 @@ outputs:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
         - cmake
-        - ninja
+        - ninja-base
       host:
-        - gtest
-        - jsoncpp
-        - libabseil
+        - gtest 1.14.0
+        - jsoncpp 1.9.4
+        - libabseil 20240116.2
+        # requires abseil test targets to build with tests enabled
         - libabseil-tests
-        - zlib
+        - zlib {{ zlib }}
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run:
+        - zlib       # bounds through run_exports
+        - libabseil  # bounds through run_exports
         - {{ pin_subpackage('libprotobuf', exact=True) }}
     test:
       requires:
@@ -144,8 +147,7 @@ outputs:
         # https://discourse.cmake.org/t/questions-about-find-package-cli-msvc/6194
         - {{ compiler('cxx') }}
         - cmake
-        - ninja
-        - zlib
+        - ninja-base
       files:
         - cmake_test/
       commands:
@@ -165,8 +167,6 @@ outputs:
     script: build-pyheaders.sh  # [unix]
     script: build-pyheaders.bat  # [win]
     requirements:
-      build:
-        - rsync  # [unix]
       host:
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run_constrained:
