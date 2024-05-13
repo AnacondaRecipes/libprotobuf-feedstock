@@ -29,6 +29,8 @@ source:
       # skip annoyingly flaky test on windows, see
       # https://github.com/protocolbuffers/protobuf/issues/8645
       - patches/0009-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch      # [win]
+      # workaround stdout tests capture issue on osx builders
+      - patches/0010-do-not-capture-stdout-on-osx-tests.patch  # [osx]
 
 build:
   number: 0
