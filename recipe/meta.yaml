@@ -161,9 +161,9 @@ outputs:
 
         # more CMake integration
         - cd cmake_test
-        - cmake -GNinja $CMAKE_ARGS .   # [unix]
-        - cmake -GNinja %CMAKE_ARGS% .  # [win]
-        - cmake --build .
+        - cmake -GNinja $CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release .  # [unix]
+        - cmake -GNinja %CMAKE_ARGS% -DCMAKE_BUILD_TYPE=Release . # [win]
+        - cmake --build . --config Release
 
   - name: libprotobuf-python-headers
     script: build-pyheaders.sh  # [unix]
