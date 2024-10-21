@@ -107,7 +107,9 @@ about:
 extra:
   anaconda-services:
     ref: https://anaconda.zendesk.com/agent/tickets/55704
-    reason: Dependency for ortools
+    reason: Dependency for Ortools
+  recipe-maintainers:
+    - ianaobi
   recipe-maintainers:
     - xylar
     - dopplershift
