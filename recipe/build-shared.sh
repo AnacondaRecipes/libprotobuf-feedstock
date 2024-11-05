@@ -2,19 +2,31 @@
 
 set -ex
 
-if [ "$(uname)" == "Linux" ];
-then
+if [ "$(uname)" == "Linux" ]; then
+    # Set a default optimization level if not already set
+    if [[ ! $CXXFLAGS =~ -O[0-9] ]]; then
+        CXXFLAGS="$CXXFLAGS -O2"
+    fi
+    if [[ ! $CPPFLAGS =~ -O[0-9] ]]; then
+        CPPFLAGS="$CPPFLAGS -O2"
+    fi
+
     # protobuf uses PROTOBUF_OPT_FLAG to set the optimization level
-    # unit test can fail if optmization above 0 are used.
-    CPPFLAGS="${CPPFLAGS//-O[0-9]/}"
-    CXXFLAGS="${CXXFLAGS//-O[0-9]/}"
+    # unit test can fail if optimization above 0 are used.
     export PROTOBUF_OPT_FLAG="-O2"
     # to improve performance, disable checks intended for debugging
     CXXFLAGS="$CXXFLAGS -DNDEBUG"
-elif [ "$(uname)" == "Darwin" ];
-then
+elif [ "$(uname)" == "Darwin" ]; then
     # remove pie from LDFLAGS
     LDFLAGS="${LDFLAGS//-pie/}"
+    
+    # Set a default optimization level if not already set
+    if [[ ! $CXXFLAGS =~ -O[0-9] ]]; then
+        CXXFLAGS="$CXXFLAGS -O2"
+    fi
+    if [[ ! $CPPFLAGS =~ -O[0-9] ]]; then
+        CPPFLAGS="$CPPFLAGS -O2"
+    fi
 fi
 
 # required to pick up conda installed zlib
