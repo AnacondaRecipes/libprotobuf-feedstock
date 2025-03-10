@@ -1,17 +1,17 @@
-From b4ad926042037d3f40604bf7fa617f49cb426399 Mon Sep 17 00:00:00 2001
+From 5f60ff25d7354d4f2efd04bfd269a31a63f44793 Mon Sep 17 00:00:00 2001
 From: "Uwe L. Korn" <uwe.korn@quantco.com>
 Date: Wed, 14 Jun 2023 11:36:55 +0200
-Subject: [PATCH 4/9] Export functions in google::compiler::java::names
+Subject: [PATCH 3/7] Export functions in google::compiler::java::names
 
 ---
- src/google/protobuf/compiler/java/names.h | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
+ src/google/protobuf/compiler/java/names.h | 26 +++++++++++------------
+ 1 file changed, 13 insertions(+), 13 deletions(-)
 
 diff --git a/src/google/protobuf/compiler/java/names.h b/src/google/protobuf/compiler/java/names.h
-index 5e8b40287..c67668bb6 100644
+index c2eb34cb3..426742a04 100644
 --- a/src/google/protobuf/compiler/java/names.h
 +++ b/src/google/protobuf/compiler/java/names.h
-@@ -40,67 +40,67 @@ namespace java {
+@@ -41,35 +41,35 @@ namespace java {
  //
  // Returns:
  //   The fully-qualified Java class name.
@@ -52,11 +52,34 @@ index 5e8b40287..c67668bb6 100644
                              Options options = {});
  
  // Requires:
+@@ -77,51 +77,51 @@ std::string FileJavaPackage(const FileDescriptor* descriptor,
+ //
+ // Returns:
+ //   Java package directory.
+-std::string JavaPackageDirectory(const FileDescriptor* file);
++PROTOC_EXPORT std::string JavaPackageDirectory(const FileDescriptor* file);
+ 
+ // Requires:
+ //   descriptor != NULL
+ //
+ // Returns:
+ //   The unqualified Java class name.
+-std::string FileClassName(const FileDescriptor* file);
++PROTOC_EXPORT std::string FileClassName(const FileDescriptor* file);
+ 
+ // Requires:
  //   descriptor != NULL
  // Returns:
- //   Capitalized camel case name field name.
--std::string CapitalizedFieldName(const FieldDescriptor* descriptor);
-+PROTOC_EXPORT std::string CapitalizedFieldName(const FieldDescriptor* descriptor);
+ //   Capitalized camel case field name.
+-std::string CapitalizedFieldName(const FieldDescriptor* field);
++PROTOC_EXPORT std::string CapitalizedFieldName(const FieldDescriptor* field);
+ 
+ // Requires:
+ //   descriptor != NULL
+ // Returns:
+ //   Capitalized camel case oneof name.
+-std::string CapitalizedOneofName(const OneofDescriptor* oneof);
++PROTOC_EXPORT std::string CapitalizedOneofName(const OneofDescriptor* oneof);
  
  // Returns:
  //   Converts a name to camel-case. If cap_first_letter is true, capitalize the
