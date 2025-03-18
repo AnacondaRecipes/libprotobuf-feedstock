@@ -61,7 +61,7 @@ outputs:
       host:
         - gtest 1.14.0
         - jsoncpp 1.9.4
-        - libabseil {{ libabseil }}
+        - libabseil 20250127.0=cxx17*
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
         - zlib {{ zlib }}
