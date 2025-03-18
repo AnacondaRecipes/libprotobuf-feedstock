@@ -30,6 +30,7 @@ source:
 
 build:
   number: 0
+  skip: true  # [not (linux and aarch64)]
 
 requirements:
   build:  # [linux or (osx and arm64)]
@@ -60,7 +61,7 @@ outputs:
       host:
         - gtest 1.14.0
         - jsoncpp 1.9.4
-        - libabseil 20250127.0
+        - libabseil {{ libabseil }}
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
         - zlib {{ zlib }}
@@ -130,7 +131,7 @@ outputs:
       host:
         - gtest 1.14.0
         - jsoncpp 1.9.4
-        - libabseil 20250127.0
+        - libabseil {{ libabseil }}
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
         - zlib {{ zlib }}
