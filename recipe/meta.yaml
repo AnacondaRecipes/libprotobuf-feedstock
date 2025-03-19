@@ -1,8 +1,8 @@
 # keep this without major version to let the bot pick it up
-{% set version = "25.3" %}
+{% set version = "29.3" %}
 # protobuf doesn't add the major version in the tag, it's defined per language in
 # https://github.com/protocolbuffers/protobuf/blob/main/version.json
-{% set major = "4" %}
+{% set major = "5" %}
 
 {% set libraries = ["libprotoc", "libprotobuf", "libprotobuf-lite"] %}
 
@@ -12,25 +12,21 @@ package:
 
 source:
   - url: https://github.com/protocolbuffers/protobuf/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e
+    sha256: 008a11cc56f9b96679b4c285fd05f46d317d685be3ab524b2a310be0fbad987e
     patches:
-      - patches/0001-use-consistent-cmake-location.patch
+      # - patches/0001-use-consistent-cmake-location.patch
       - patches/0002-set-static-lib-extension-on-windows.patch
       - patches/0003-always-look-for-shared-abseil-builds.patch
       # grpc_cpp_java_plugin links against otherwise internal symbols
       - patches/0004-Export-functions-in-google-compiler-java-names.patch
       - patches/0005-do-not-install-vendored-gmock.patch
-      # backport https://github.com/protocolbuffers/protobuf/pull/15518
-      - patches/0006-Fix-getting-env-variables-on-windows.patch
-      # backport https://github.com/protocolbuffers/protobuf/commit/f78f9c51fa2470070e5d4b49649800971c789224
-      - patches/0007-Workaround-false-positive-warning-in-MSVC.-Fixes-htt.patch
       # backport https://github.com/protocolbuffers/protobuf/pull/15888
-      - patches/0008-fix-pkg-config-metadata-for-shared-abseil-on-windows.patch
-      # skip annoyingly flaky test on windows, see
+      # - patches/0006-fix-pkg-config-metadata-for-shared-abseil-on-windows.patch
+      - patches/0006-install-a-missing-upb-header.patch
+      # skip annoyingly flaky test, see
       # https://github.com/protocolbuffers/protobuf/issues/8645
-      - patches/0009-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch      # [win]
-      # workaround stdout tests capture issue on osx builders
-      - patches/0010-do-not-capture-stdout-on-osx-tests.patch  # [osx]
+      - patches/0007-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch
+      - patches/0007-export-symbols-needed-by-grpc.patch
 
 build:
   number: 0
@@ -64,7 +60,7 @@ outputs:
       host:
         - gtest 1.14.0
         - jsoncpp 1.9.4
-        - libabseil 20240116.2
+        - libabseil 20250127.0
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
         - zlib {{ zlib }}
@@ -134,7 +130,7 @@ outputs:
       host:
         - gtest 1.14.0
         - jsoncpp 1.9.4
-        - libabseil 20240116.2
+        - libabseil 20250127.0
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
         - zlib {{ zlib }}
