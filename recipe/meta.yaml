@@ -27,9 +27,10 @@ source:
       # https://github.com/protocolbuffers/protobuf/issues/8645
       - patches/0007-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch
       - patches/0007-export-symbols-needed-by-grpc.patch
+      - patches/0008-fix-incorrect-signature.patch
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:  # [linux or (osx and arm64)]
