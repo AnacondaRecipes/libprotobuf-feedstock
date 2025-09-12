@@ -30,7 +30,7 @@ source:
       - patches/0008-fix-incorrect-signature.patch
 
 build:
-  number: 1
+  number: 2
 
 requirements:
   build:  # [linux or (osx and arm64)]
