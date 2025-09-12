@@ -49,6 +49,7 @@ cmake -G "Ninja" \
     -Dprotobuf_JSONCPP_PROVIDER="package" \
     -Dprotobuf_USE_EXTERNAL_GTEST=ON \
     -Dprotobuf_WITH_ZLIB=ON \
+    -DPROTOBUF_NO_THREADLOCAL=ON \
     ..
 
 cmake --build .
