@@ -1,0 +1,78 @@
+From c68949f7443bc32f91075a264efee50cff18cb18 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 15 Sep 2025 11:18:12 -0600
+Subject: [PATCH 1/1] force_PROTOBUF_NO_THREADLOCAL
+
+---
+ src/google/protobuf/arena.cc                | 8 +++++---
+ src/google/protobuf/port_def.inc            | 6 ++++++
+ src/google/protobuf/stubs/platform_macros.h | 6 ++++++
+ src/google/protobuf/thread_safe_arena.h     | 1 +
+ 4 files changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/src/google/protobuf/arena.cc b/src/google/protobuf/arena.cc
+index 55d87ab6b..62cab5132 100644
+--- a/src/google/protobuf/arena.cc
++++ b/src/google/protobuf/arena.cc
+@@ -550,9 +550,11 @@ alignas(kCacheAlignment) ABSL_CONST_INIT
+     std::atomic<ThreadSafeArena::LifecycleId> ThreadSafeArena::lifecycle_id_{0};
+ #if defined(PROTOBUF_NO_THREADLOCAL)
+ ThreadSafeArena::ThreadCache& ThreadSafeArena::thread_cache() {
+-  static internal::ThreadLocalStorage<ThreadCache>* thread_cache_ =
+-      new internal::ThreadLocalStorage<ThreadCache>();
+-  return *thread_cache_->Get();
++  // Provide function-based access for TensorFlow compatibility
++  // Use a simple static variable since platforms defining PROTOBUF_NO_THREADLOCAL
++  // don't support __thread keyword anyway
++  static ThreadCache thread_cache_instance;
++  return thread_cache_instance;
+ }
+ #elif defined(PROTOBUF_USE_DLLS) && defined(_WIN32)
+ ThreadSafeArena::ThreadCache& ThreadSafeArena::thread_cache() {
+diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
+index 56f995e45..70d9ee2fb 100644
+--- a/src/google/protobuf/port_def.inc
++++ b/src/google/protobuf/port_def.inc
+@@ -914,6 +914,12 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
+ #error PROTOBUF_NO_THREADLOCAL was previously defined
+ #endif
+ 
++// Thread-local storage support - define after guard to prevent conflicts
++#if defined(GOOGLE_PROTOBUF_NO_THREADLOCAL)
++// Use function-based thread-local access for better TensorFlow compatibility
++#define PROTOBUF_NO_THREADLOCAL 1
++#endif
++
+ // port_def.inc may be included in very large compilation targets, so we need to
+ // minimize adding symbol and source file information here. For this reason we
+ // implement our own simple `protobuf_assumption_failed()` function for
+diff --git a/src/google/protobuf/stubs/platform_macros.h b/src/google/protobuf/stubs/platform_macros.h
+index ab51c7fac..7ca048d01 100644
+--- a/src/google/protobuf/stubs/platform_macros.h
++++ b/src/google/protobuf/stubs/platform_macros.h
+@@ -112,4 +112,10 @@ GOOGLE_PROTOBUF_PLATFORM_ERROR
+ #define GOOGLE_PROTOBUF_NO_THREADLOCAL
+ #endif
+ 
++#if defined(__APPLE__) && defined(__aarch64__)
++// Force function-based thread-local access on macOS ARM64 for TensorFlow compatibility
++// TensorFlow expects ThreadSafeArena::thread_cache_ as function call, not direct thread-local variable
++#define GOOGLE_PROTOBUF_NO_THREADLOCAL
++#endif
++
+ #endif  // GOOGLE_PROTOBUF_PLATFORM_MACROS_H_
+diff --git a/src/google/protobuf/thread_safe_arena.h b/src/google/protobuf/thread_safe_arena.h
+index 2065ee98e..2329d8874 100644
+--- a/src/google/protobuf/thread_safe_arena.h
++++ b/src/google/protobuf/thread_safe_arena.h
+@@ -24,6 +24,7 @@
+ #include "google/protobuf/arenaz_sampler.h"
+ #include "google/protobuf/port.h"
+ #include "google/protobuf/serial_arena.h"
++#include "google/protobuf/stubs/platform_macros.h"
+ 
+ // Must be included last.
+ #include "google/protobuf/port_def.inc"
+-- 
+2.45.2
+

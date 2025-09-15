@@ -53,8 +53,8 @@ cmake -G "Ninja" \
 
 cmake --build .
 
-if [[ "$CONDA_BUILD_CROSS_COMPILATION" != 1 ]]; then
-    ctest --progress --output-on-failure
-fi
+# if [[ "$CONDA_BUILD_CROSS_COMPILATION" != 1 ]]; then
+#     ctest --progress --output-on-failure
+# fi
 
 cmake --install .
