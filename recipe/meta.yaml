@@ -28,13 +28,10 @@ source:
       - patches/0007-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch
       - patches/0007-export-symbols-needed-by-grpc.patch
       - patches/0008-fix-incorrect-signature.patch
+      - patches/0009-fix-tmp-directory-error.patch  # [osx]
 
 build:
-  number: 1
-
-requirements:
-  build:  # [linux or (osx and arm64)]
-    - patch  # [linux]
+  number: 2
   
 outputs:
   - name: libprotobuf
@@ -56,14 +53,15 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
       host:
-        - gtest 1.14.0
-        - jsoncpp 1.9.4
-        - libabseil 20250127.0
+        - gtest {{ gtest }}
+        - jsoncpp {{ jsoncpp }}
+        - libabseil 20250127.1
         # requires abseil test targets to build with tests enabled
-        - libabseil-tests
+        - libabseil-tests 20250127.1
         - zlib {{ zlib }}
       run:
         - zlib       # bounds through run_exports
@@ -126,14 +124,15 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
       host:
-        - gtest 1.14.0
-        - jsoncpp 1.9.4
-        - libabseil 20250127.0
+        - gtest {{ gtest }}
+        - jsoncpp {{ jsoncpp }}
+        - libabseil 20250127.1
         # requires abseil test targets to build with tests enabled
-        - libabseil-tests
+        - libabseil-tests 20250127.1
         - zlib {{ zlib }}
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run:
