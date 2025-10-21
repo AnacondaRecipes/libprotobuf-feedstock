@@ -28,6 +28,7 @@ source:
       - patches/0007-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch
       - patches/0007-export-symbols-needed-by-grpc.patch
       - patches/0008-fix-incorrect-signature.patch
+      - patches/0009-fix-tmp-directory-error.patch  # [osx]
 
 build:
   number: 2

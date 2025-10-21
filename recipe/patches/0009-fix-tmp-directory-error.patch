@@ -1,0 +1,48 @@
+From f981a19e258479a3ced4752246e92401c6df39b3 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Tue, 21 Oct 2025 14:44:54 -0600
+Subject: [PATCH 1/1] fix-tmp-directory-error
+
+F0000 00:00:1761078407.821225 24056260 message_unittest.inc:152] Check failed: File::SetContents( filename, expected_message.SerializeAsString(), true) is OK (INTERNAL: fopen(/tmp/protobuf_tempdir/golden_message, "wb"): No such file or directory)
+---
+ src/google/protobuf/testing/googletest.cc | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/src/google/protobuf/testing/googletest.cc b/src/google/protobuf/testing/googletest.cc
+index 3d57981f3..f9e2c788a 100644
+--- a/src/google/protobuf/testing/googletest.cc
++++ b/src/google/protobuf/testing/googletest.cc
+@@ -95,7 +95,12 @@ std::string TestSourceDir() {
+ namespace {
+ 
+ std::string GetTemporaryDirectoryName() {
+-  std::string result = absl::StrCat(testing::TempDir(), "protobuf_tempdir");
++  std::string temp_base = testing::TempDir();
++  // Ensure there's a trailing slash
++  if (!temp_base.empty() && temp_base.back() != '/' && temp_base.back() != '\\') {
++    temp_base += "/";
++  }
++  std::string result = absl::StrCat(temp_base, "protobuf_tempdir");
+ #ifdef _WIN32
+   // The Win32 API accepts forward slashes as a path delimiter as long as the
+   // path doesn't use the "\\?\" prefix.
+@@ -119,7 +124,15 @@ class TempDirDeleter {
+   std::string GetTempDir() {
+     if (name_.empty()) {
+       name_ = GetTemporaryDirectoryName();
+-      ABSL_CHECK(mkdir(name_.c_str(), 0777) == 0) << strerror(errno);
++    }
++    
++    // Always check if directory exists and recreate if necessary
++    // (it might have been deleted externally)
++    if (!File::Exists(name_)) {
++      int mkdir_result = mkdir(name_.c_str(), 0777);
++      if (mkdir_result != 0 && errno != EEXIST) {
++        ABSL_CHECK(false) << "mkdir(" << name_ << "): " << strerror(errno);
++      }
+ 
+       // Stick a file in the directory that tells people what this is, in case
+       // we abort and don't get a chance to delete it.
+-- 
+2.45.2
+
