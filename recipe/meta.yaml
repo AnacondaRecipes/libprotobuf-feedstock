@@ -69,6 +69,7 @@ outputs:
         # cmake needs compiler to be able to run package detection, see
         # https://discourse.cmake.org/t/questions-about-find-package-cli-msvc/6194
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
         - pkg-config
@@ -138,6 +139,7 @@ outputs:
         # cmake needs compiler to be able to run package detection, see
         # https://discourse.cmake.org/t/questions-about-find-package-cli-msvc/6194
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
       files:
