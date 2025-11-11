@@ -5,6 +5,9 @@
 {% set major = "6" %}
 
 {% set libraries = ["libprotoc", "libprotobuf", "libprotobuf-lite"] %}
+# different patterns between unix & windows
+{% set utf8_libraries = ["libutf8_range", "libutf8_validity"] %}     # [unix]
+{% set utf8_libraries = ["utf8_range", "utf8_validity"] %}           # [win]
 
 package:
   name: libprotobuf-split
@@ -14,18 +17,23 @@ source:
   - url: https://github.com/protocolbuffers/protobuf/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
     sha256: b6b03fbaa3a90f3d4f2a3fa4ecc41d7cd0326f92fcc920a7843f12206c8d52cd
     patches:
-      - patches/0002-set-static-lib-extension-on-windows.patch
-      - patches/0003-always-look-for-shared-abseil-builds.patch
-      # grpc_cpp_java_plugin links against otherwise internal symbols
-      # - patches/0004-Export-functions-in-google-compiler-java-names.patch
-      - patches/0005-do-not-install-vendored-gmock.patch
-      # skip annoyingly flaky test, see
+      - patches/0001-set-static-lib-extension-on-windows.patch
+      - patches/0002-always-look-for-shared-abseil-builds.patch
+      - patches/0003-do-not-install-vendored-gmock.patch
+      # skip annoyingly flaky test on windows, see
       # https://github.com/protocolbuffers/protobuf/issues/8645
-      - patches/0007-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch
-      - patches/0007-export-symbols-needed-by-grpc.patch
+      - patches/0004-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch      # [win]
+      # necessary for building grpc
+      - patches/0005-export-symbols-needed-by-grpc.patch
+      # protobuf does a non-standard `libfoo.dll` naming pattern for protobuf;
+      # for now, we avoid extending it to utf8_range, because (despite correct CMake
+      # metadata), other libraries - not least grpcio - are still expecting to find
+      # utf8_range.{dll,lib}, not libutf8_range.{dll,lib}.
+      - patches/0006-do-not-add-LIB_PREFIX-to-utf8_-range-validity-on-win.patch     # [win]
+      - patches/0007-Workaround-nvcc-bug-in-message_lite.h.patch
 
 build:
-  number: 1
+  number: 0
  
 outputs:
   - name: libprotobuf
@@ -76,7 +84,7 @@ outputs:
       files:
         - cmake_test/
       commands:
-        {% for each_lib in libraries %}
+        {% for each_lib in libraries + utf8_libraries%}
         # shared libraries
         - test -f ${PREFIX}/lib/{{ each_lib }}.so                      # [linux]
         - test -f ${PREFIX}/lib/{{ each_lib }}.dylib                   # [osx]
@@ -127,7 +135,7 @@ outputs:
         - jsoncpp {{ jsoncpp }}
         - libabseil {{ libabseil }}
         # requires abseil test targets to build with tests enabled
-        - libabseil-tests
+        - libabseil-tests {{ libabseil }}
         - zlib {{ zlib }}
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run:
