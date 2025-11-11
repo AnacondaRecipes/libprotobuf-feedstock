@@ -1,7 +1,7 @@
-From 71b88e6595f2a587a3c3b3279b46dfe6d7c811f1 Mon Sep 17 00:00:00 2001
+From f18d37e060e977021a2fbd7293f2da9c93dd6827 Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Sun, 2 Mar 2025 22:14:34 +1100
-Subject: [PATCH 7/7] export symbols needed by grpc
+Subject: [PATCH 5/6] export symbols needed by grpc
 
 avoid that the potentially inlined IsDefaultSerializationDeterministic
 inherits a linker reference to default_serialization_deterministic_, which,
@@ -14,10 +14,10 @@ while part of the .dll/.lib, is private and may not be linkable directly
  4 files changed, 8 insertions(+), 5 deletions(-)
 
 diff --git a/src/google/protobuf/io/coded_stream.cc b/src/google/protobuf/io/coded_stream.cc
-index f8d7b71a1..92b82b04a 100644
+index 8caa4d9fe..9ff82012e 100644
 --- a/src/google/protobuf/io/coded_stream.cc
 +++ b/src/google/protobuf/io/coded_stream.cc
-@@ -1019,6 +1019,10 @@ uint8_t* EpsCopyOutputStream::WriteCordOutline(const absl::Cord& c, uint8_t* ptr
+@@ -1013,6 +1013,10 @@ uint8_t* EpsCopyOutputStream::WriteCordOutline(const absl::Cord& c,
  std::atomic<bool> CodedOutputStream::default_serialization_deterministic_{
      false};
  
@@ -29,10 +29,10 @@ index f8d7b71a1..92b82b04a 100644
  
  uint8_t* CodedOutputStream::WriteCordToArray(const absl::Cord& cord,
 diff --git a/src/google/protobuf/io/coded_stream.h b/src/google/protobuf/io/coded_stream.h
-index dc03435b2..70435c971 100644
+index 19597d151..a7699d0aa 100644
 --- a/src/google/protobuf/io/coded_stream.h
 +++ b/src/google/protobuf/io/coded_stream.h
-@@ -1255,10 +1255,7 @@ class PROTOBUF_EXPORT CodedOutputStream {
+@@ -1285,10 +1285,7 @@ class PROTOBUF_EXPORT CodedOutputStream {
      return impl_.IsSerializationDeterministic();
    }
  
@@ -45,10 +45,10 @@ index dc03435b2..70435c971 100644
    template <typename Func>
    void Serialize(const Func& func);
 diff --git a/upb/mem/alloc.h b/upb/mem/alloc.h
-index 441731d2d..8f46e9afd 100644
+index 04da2337b..5f85c6951 100644
 --- a/upb/mem/alloc.h
 +++ b/upb/mem/alloc.h
-@@ -52,7 +52,7 @@ UPB_INLINE void upb_free(upb_alloc* alloc, void* ptr) {
+@@ -76,7 +76,7 @@ UPB_INLINE void upb_free_sized(upb_alloc* alloc, void* ptr, size_t size) {
  
  // The global allocator used by upb. Uses the standard malloc()/free().
  
@@ -58,15 +58,15 @@ index 441731d2d..8f46e9afd 100644
  /* Functions that hard-code the global malloc.
   *
 diff --git a/upb/mem/internal/arena.h b/upb/mem/internal/arena.h
-index 9a6469edc..796763a3f 100644
+index 2bf7dea3b..45d18feef 100644
 --- a/upb/mem/internal/arena.h
 +++ b/upb/mem/internal/arena.h
-@@ -49,6 +49,8 @@ UPB_INLINE size_t UPB_PRIVATE(_upb_ArenaHas)(const struct upb_Arena* a) {
-   return (size_t)(a->UPB_ONLYBITS(end) - a->UPB_ONLYBITS(ptr));
+@@ -62,6 +62,8 @@ UPB_INLINE bool UPB_PRIVATE(_upb_Arena_IsAligned)(const void* ptr) {
+   return (uintptr_t)ptr % UPB_MALLOC_ALIGN == 0;
  }
  
 +UPB_API void* UPB_PRIVATE(_upb_Arena_SlowMalloc)(struct upb_Arena * a, size_t size);
 +
  UPB_API_INLINE void* upb_Arena_Malloc(struct upb_Arena* a, size_t size) {
-   void* UPB_PRIVATE(_upb_Arena_SlowMalloc)(struct upb_Arena * a, size_t size);
+   UPB_PRIVATE(upb_Xsan_AccessReadWrite)(UPB_XSAN(a));
  
