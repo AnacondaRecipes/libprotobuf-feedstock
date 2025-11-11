@@ -4,4 +4,4 @@ build_env_vars:
 staging_channel_upload_target: protobuf-6.33.0-build-4
 
 channels:
-  - https://staging.continuum.io/pbp/protobuf-6.33.0-build-3
+  - https://staging.continuum.io/pbp/protobuf-6.33.0-build-4
