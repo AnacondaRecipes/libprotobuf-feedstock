@@ -1,10 +1,13 @@
 # keep this without major version to let the bot pick it up
-{% set version = "29.3" %}
+{% set version = "33.0" %}
 # protobuf doesn't add the major version in the tag, it's defined per language in
 # https://github.com/protocolbuffers/protobuf/blob/main/version.json
-{% set major = "5" %}
+{% set major = "6" %}
 
 {% set libraries = ["libprotoc", "libprotobuf", "libprotobuf-lite"] %}
+# different patterns between unix & windows
+{% set utf8_libraries = ["libutf8_range", "libutf8_validity"] %}     # [unix]
+{% set utf8_libraries = ["utf8_range", "utf8_validity"] %}           # [win]
 
 package:
   name: libprotobuf-split
@@ -12,30 +15,26 @@ package:
 
 source:
   - url: https://github.com/protocolbuffers/protobuf/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: 008a11cc56f9b96679b4c285fd05f46d317d685be3ab524b2a310be0fbad987e
+    sha256: b6b03fbaa3a90f3d4f2a3fa4ecc41d7cd0326f92fcc920a7843f12206c8d52cd
     patches:
-      # - patches/0001-use-consistent-cmake-location.patch
-      - patches/0002-set-static-lib-extension-on-windows.patch
-      - patches/0003-always-look-for-shared-abseil-builds.patch
-      # grpc_cpp_java_plugin links against otherwise internal symbols
-      - patches/0004-Export-functions-in-google-compiler-java-names.patch
-      - patches/0005-do-not-install-vendored-gmock.patch
-      # backport https://github.com/protocolbuffers/protobuf/pull/15888
-      # - patches/0006-fix-pkg-config-metadata-for-shared-abseil-on-windows.patch
-      - patches/0006-install-a-missing-upb-header.patch
-      # skip annoyingly flaky test, see
+      - patches/0001-set-static-lib-extension-on-windows.patch
+      - patches/0002-always-look-for-shared-abseil-builds.patch
+      - patches/0003-do-not-install-vendored-gmock.patch
+      # skip annoyingly flaky test on windows, see
       # https://github.com/protocolbuffers/protobuf/issues/8645
-      - patches/0007-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch
-      - patches/0007-export-symbols-needed-by-grpc.patch
-      - patches/0008-fix-incorrect-signature.patch
+      - patches/0004-disable-MapImplTest.RandomOrdering-due-to-flakiness.patch      # [win]
+      # necessary for building grpc
+      - patches/0005-export-symbols-needed-by-grpc.patch
+      # protobuf does a non-standard `libfoo.dll` naming pattern for protobuf;
+      # for now, we avoid extending it to utf8_range, because (despite correct CMake
+      # metadata), other libraries - not least grpcio - are still expecting to find
+      # utf8_range.{dll,lib}, not libutf8_range.{dll,lib}.
+      - patches/0006-do-not-add-LIB_PREFIX-to-utf8_-range-validity-on-win.patch     # [win]
+      - patches/0007-Workaround-nvcc-bug-in-message_lite.h.patch
 
 build:
-  number: 1
-
-requirements:
-  build:  # [linux or (osx and arm64)]
-    - patch  # [linux]
-  
+  number: 0
+ 
 outputs:
   - name: libprotobuf
     script: build-lib.sh  # [unix]
@@ -56,12 +55,13 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
       host:
-        - gtest 1.14.0
-        - jsoncpp 1.9.4
-        - libabseil 20250127.0
+        - gtest {{ gtest }}
+        - jsoncpp {{ jsoncpp }}
+        - libabseil {{ libabseil }}
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
         - zlib {{ zlib }}
@@ -77,13 +77,14 @@ outputs:
         # cmake needs compiler to be able to run package detection, see
         # https://discourse.cmake.org/t/questions-about-find-package-cli-msvc/6194
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
         - pkg-config
       files:
         - cmake_test/
       commands:
-        {% for each_lib in libraries %}
+        {% for each_lib in libraries + utf8_libraries%}
         # shared libraries
         - test -f ${PREFIX}/lib/{{ each_lib }}.so                      # [linux]
         - test -f ${PREFIX}/lib/{{ each_lib }}.dylib                   # [osx]
@@ -126,14 +127,15 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
       host:
-        - gtest 1.14.0
-        - jsoncpp 1.9.4
-        - libabseil 20250127.0
+        - gtest {{ gtest }}
+        - jsoncpp {{ jsoncpp }}
+        - libabseil {{ libabseil }}
         # requires abseil test targets to build with tests enabled
-        - libabseil-tests
+        - libabseil-tests {{ libabseil }}
         - zlib {{ zlib }}
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run:
@@ -145,6 +147,7 @@ outputs:
         # cmake needs compiler to be able to run package detection, see
         # https://discourse.cmake.org/t/questions-about-find-package-cli-msvc/6194
         - {{ compiler('cxx') }}
+        - {{ stdlib('c') }}
         - cmake
         - ninja-base
       files:

@@ -1,8 +1,6 @@
 project(cf_dummy LANGUAGES C CXX)
 cmake_minimum_required(VERSION 3.12)
 
-add_compile_definitions(_LIBCPP_DISABLE_AVAILABILITY)
-
 # We need to specify CONFIG to make sure that CMake
 # uses protobuf-config.cmake instead of relying on its
 # own FindProtobuf.cmake that does not know about
