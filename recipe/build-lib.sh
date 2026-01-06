@@ -44,6 +44,7 @@ cmake -G "Ninja" \
     -DCMAKE_CXX_STANDARD=17 \
     -Dprotobuf_ABSL_PROVIDER="package" \
     -Dprotobuf_BUILD_SHARED_LIBS=$CF_SHARED \
+    -DPROTOBUF_USE_DLLS=$CF_SHARED \
     -Dprotobuf_JSONCPP_PROVIDER="package" \
     -Dprotobuf_USE_EXTERNAL_GTEST=ON \
     -Dprotobuf_WITH_ZLIB=ON \

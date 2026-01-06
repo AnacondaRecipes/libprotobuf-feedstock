@@ -1,0 +1,49 @@
+From 206154fceabcc4095ec10c46a30a26d9f31cb142 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Tue, 6 Jan 2026 14:18:48 -0700
+Subject: [PATCH 1/1] osx-tls-shared-lib.patch
+
+Fix thread-local storage export for shared libraries on macOS
+
+Extend the PROTOBUF_USE_DLLS thread-local variable fix to non-Windows
+platforms. On macOS ARM64, exporting __thread variables from dylibs
+causes "illegal thread local variable reference to regular symbol"
+linker errors in downstream consumers like TensorFlow.
+
+The existing Windows fix wraps TLS variables in function-local statics,
+preventing symbol export issues. This patch applies the same approach
+when PROTOBUF_USE_DLLS is set on any platform, not just _WIN32.
+---
+ src/google/protobuf/arena.cc            | 2 +-
+ src/google/protobuf/thread_safe_arena.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/google/protobuf/arena.cc b/src/google/protobuf/arena.cc
+index 284b8fb00..a53e8cbfb 100644
+--- a/src/google/protobuf/arena.cc
++++ b/src/google/protobuf/arena.cc
+@@ -547,7 +547,7 @@ ThreadSafeArena::ThreadCache& ThreadSafeArena::thread_cache() {
+       new internal::ThreadLocalStorage<ThreadCache>();
+   return *thread_cache_->Get();
+ }
+-#elif defined(PROTOBUF_USE_DLLS) && defined(_WIN32)
++#elif defined(PROTOBUF_USE_DLLS)
+ ThreadSafeArena::ThreadCache& ThreadSafeArena::thread_cache() {
+   static PROTOBUF_THREAD_LOCAL ThreadCache thread_cache;
+   return thread_cache;
+diff --git a/src/google/protobuf/thread_safe_arena.h b/src/google/protobuf/thread_safe_arena.h
+index 4f976eaa0..607a29f2b 100644
+--- a/src/google/protobuf/thread_safe_arena.h
++++ b/src/google/protobuf/thread_safe_arena.h
+@@ -252,7 +252,7 @@ class PROTOBUF_EXPORT ThreadSafeArena {
+   // iOS does not support __thread keyword so we use a custom thread local
+   // storage class we implemented.
+   static ThreadCache& thread_cache();
+-#elif defined(PROTOBUF_USE_DLLS) && defined(_WIN32)
++#elif defined(PROTOBUF_USE_DLLS)
+   // Thread local variables cannot be exposed through MSVC DLL interface but we
+   // can wrap them in static functions.
+   static ThreadCache& thread_cache();
+-- 
+2.50.1 (Apple Git-155)
+
