@@ -3,9 +3,9 @@ upstream_sources:
   - github:
       identifier: protocolbuffers/protobuf
       use_max_tag: true
-      include_regex: ^v?\d+\.\d+\.\d+$
-      from_pattern: ^v?(\d+\.\d+\.\d+)$
-      to_pattern: \1
+      include_regex: ^v?\d+\.\d+$
+      from_pattern: ^v?(\d+\.\d+)$
+      to_pattern: 7.\1
     packages:
       - libprotobuf
       - libprotobuf-python-headers
