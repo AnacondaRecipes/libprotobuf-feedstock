@@ -126,7 +126,8 @@ outputs:
         ] %}
         - nm -g $PREFIX/lib/libupb.a | grep -E "[TD] {{ symb }}"                            # [linux]
         - nm -g $PREFIX/lib/libupb.a | grep -E "[TD] _{{ symb }}"                           # [osx]
-        - dumpbin -symbols %LIBRARY_LIB%\libupb.lib | grep -E "SECT.*External.*{{ symb }}"  # [win]
+        # findstr: grep is not available on defaults win (no m2-grep)
+        - dumpbin -symbols %LIBRARY_LIB%\libupb.lib | findstr /R /C:"SECT.*External.*{{ symb }}"  # [win]
         {% endfor %}
 
         # cmake
