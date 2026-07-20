@@ -10,6 +10,10 @@ if [[ "$(uname)" == "Linux" ]]; then
     # to improve performance, disable checks intended for debugging
     CXXFLAGS="$CXXFLAGS -DNDEBUG"
 elif [[ "$(uname)" == "Darwin" ]]; then
+    # Do NOT add -D_LIBCPP_DISABLE_AVAILABILITY here. With clang 20 / libcxx-devel
+    # that forces bad_function_call's key function into the dylib; macOS 12.1's
+    # system libc++ does not provide those LLVM 19+ symbols, so shared linking
+    # fails with undefined std::bad_function_call (~, typeinfo, vtable).
     # remove pie from LDFLAGS
     LDFLAGS="${LDFLAGS//-pie/}"
     # CoreFoundation is needed as least as of libprotobuf>=4.23.X

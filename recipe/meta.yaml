@@ -1,10 +1,18 @@
 # keep this without major version to let the bot pick it up
-{% set version = "33.5" %}
+{% set version = "35.1" %}
 # protobuf doesn't add the major version in the tag, it's defined per language in
 # https://github.com/protocolbuffers/protobuf/blob/main/version.json
-{% set major = "6" %}
+{% set major = "7" %}
+# pkg-config metadata sets yet another version format, not using the major version
+# but adding the rc number as a patch version, or 0 for regular releases
+{% set pkgconfig_ver = version.split(".")[0] ~ "." ~ version.split(".")[1] %}
+{% if version.split(".")[-1].startswith("rc") %}
+  {% set pkgconfig_ver = pkgconfig_ver ~ "." ~ version.split(".")[-1].replace("rc", "") %}
+{% else %}
+  {% set pkgconfig_ver = pkgconfig_ver ~ "." ~ "0" %}
+{% endif %}
 
-{% set libraries = ["libprotoc", "libprotobuf", "libprotobuf-lite"] %}
+{% set proto_libraries = ["libprotoc", "libprotobuf", "libprotobuf-lite"] %}
 # different patterns between unix & windows
 {% set utf8_libraries = ["libutf8_range", "libutf8_validity"] %}     # [unix]
 {% set utf8_libraries = ["utf8_range", "utf8_validity"] %}           # [win]
@@ -15,7 +23,7 @@ package:
 
 source:
   - url: https://github.com/protocolbuffers/protobuf/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: 440848dffa209beb8a04e41cc352762e44f8e91342b2a43aab6af9b30713c2f6
+    sha256: 22775f9376938295efa2d59a59bde4cd075a42df5a9b4d27aa9b99fa6a413bd2
     patches:
       - patches/0001-set-static-lib-extension-on-windows.patch
       - patches/0002-always-look-for-shared-abseil-builds.patch
@@ -31,11 +39,14 @@ source:
       # utf8_range.{dll,lib}, not libutf8_range.{dll,lib}.
       - patches/0006-do-not-add-LIB_PREFIX-to-utf8_-range-validity-on-win.patch     # [win]
       - patches/0007-Workaround-nvcc-bug-in-message_lite.h.patch
-      - patches/0008-fix-macos-tls-linking.patch  # [osx]
+      - patches/0008-Ensure-exact-same-retain-attributes-for-UPB-link-tim.patch
+      # Revert https://github.com/protocolbuffers/protobuf/pull/25326
+      - patches/0009-Revert-Breaking-change-make-generator-headers-privat.patch
+      - patches/0010-fix-macos-tls-linking.patch  # [osx]
 
 build:
   number: 0
- 
+
 outputs:
   - name: libprotobuf
     script: build-lib.sh  # [unix]
@@ -68,7 +79,7 @@ outputs:
         - zlib {{ zlib }}
       run:
         - zlib       # bounds through run_exports
-        - libabseil  # bounds through run_exports        
+        - libabseil  # bounds through run_exports
         # following google's C++ support policy, protobuf only support MacOS >=10.13, see:
         # https://github.com/google/oss-policies-info/blob/main/foundational-cxx-support-matrix.md
         # https://github.com/protocolbuffers/protobuf/blob/v24.0/Protobuf-C%2B%2B.podspec#L29
@@ -85,7 +96,7 @@ outputs:
       files:
         - cmake_test/
       commands:
-        {% for each_lib in libraries + utf8_libraries%}
+        {% for each_lib in proto_libraries + utf8_libraries %}
         # shared libraries
         - test -f ${PREFIX}/lib/{{ each_lib }}.so                      # [linux]
         - test -f ${PREFIX}/lib/{{ each_lib }}.dylib                   # [osx]
@@ -97,18 +108,42 @@ outputs:
         - if exist %LIBRARY_LIB%\{{ each_lib }}-static.lib exit 1      # [win]
         {% endfor %}
 
+        # presence of upb-related includes & libraries (moved here from grpc), see
+        # https://github.com/protocolbuffers/protobuf/issues/12927
+        - test -d ${PREFIX}/include/upb                 # [unix]
+        - test -f ${PREFIX}/lib/libupb.a                # [unix]
+        - if not exist %LIBRARY_INC%\upb exit 1         # [win]
+        - if not exist %LIBRARY_LIB%\libupb.lib exit 1  # [win]
+
+        # upb headers needed by protobuf, see
+        # https://github.com/protocolbuffers/protobuf/issues/20522
+        - test -f ${PREFIX}/include/upb/wire/internal/reader.h          # [unix]
+        - if not exist %LIBRARY_INC%\upb\wire\internal\reader.h exit 1  # [win]
+        # check if required symbols are in libupb
+        {% for symb in [
+            "upb_Arena_Free", "upb_Arena_Init", "upb_Decode", "upb_Encode", "upb_alloc_global",
+            "_upb_Arena_SlowMalloc_dont_copy_me__upb_internal_use_only"
+        ] %}
+        - nm -g $PREFIX/lib/libupb.a | grep -E "[TD] {{ symb }}"                            # [linux]
+        - nm -g $PREFIX/lib/libupb.a | grep -E "[TD] _{{ symb }}"                           # [osx]
+        - dumpbin -symbols %LIBRARY_LIB%\libupb.lib | grep -E "SECT.*External.*{{ symb }}"  # [win]
+        {% endfor %}
+
         # cmake
         - test -f ${PREFIX}/lib/cmake/protobuf/protobuf-config.cmake              # [unix]
         - if not exist %LIBRARY_LIB%\cmake\protobuf\protobuf-config.cmake exit 1  # [win]
 
         # pkg-config
-        - pkg-config --print-errors --exact-version "{{ version }}.0" protobuf
-        - pkg-config --print-errors --exact-version "{{ version }}.0" protobuf-lite
+        - pkg-config --print-errors --exact-version "{{ pkgconfig_ver }}" protobuf
+        - pkg-config --print-errors --exact-version "{{ pkgconfig_ver }}" protobuf-lite
 
         # binary
         - protoc --help
 
         # more CMake integration
+        # cmake 4.3.x on osx uses @loader_path/../lib for libzstd; conda hardlinks can
+        # make dyld resolve that under pkgs/ instead of $PREFIX/lib.
+        - export DYLD_FALLBACK_LIBRARY_PATH=${PREFIX}/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}  # [osx]
         - cd cmake_test
         - cmake -GNinja $CMAKE_ARGS .   # [unix]
         - cmake -GNinja %CMAKE_ARGS% .  # [win]
@@ -120,8 +155,10 @@ outputs:
     build:
       always_include_files:
         # Must overwrite the CMake metadata from shared libprotobuf
-        - lib/cmake/protobuf/           # [unix]
-        - Library/lib/cmake/protobuf/   # [win]
+        - lib/cmake/protobuf/            # [unix]
+        - lib/cmake/utf8_range/          # [unix]
+        - Library/lib/cmake/protobuf/    # [win]
+        - Library/lib/cmake/utf8_range/  # [win]
       ignore_run_exports_from:
         - jsoncpp
     requirements:
@@ -154,13 +191,14 @@ outputs:
       files:
         - cmake_test/
       commands:
-        {% for each_lib in libraries %}
+        {% for each_lib in proto_libraries %}
         # static libraries
         - test -f ${PREFIX}/lib/{{ each_lib }}.a                       # [unix]
         - if not exist %LIBRARY_LIB%\{{ each_lib }}-static.lib exit 1  # [win]
         {% endfor %}
 
         # more CMake integration
+        - export DYLD_FALLBACK_LIBRARY_PATH=${PREFIX}/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}  # [osx]
         - cd cmake_test
         - cmake -GNinja $CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release .  # [unix]
         - cmake -GNinja %CMAKE_ARGS% -DCMAKE_BUILD_TYPE=Release . # [win]
