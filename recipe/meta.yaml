@@ -52,8 +52,6 @@ outputs:
     script: build-lib.sh  # [unix]
     script: build-lib.bat  # [win]
     build:
-      missing_dso_whitelist:  # [s390x]
-        - $RPATH/ld64.so.1    # [s390x]
       run_exports:
         # protobuf now (intentionally) increments the SOVER with every patch release, which
         # breaks tools like grpc_plugin_cpp if they get the wrong libprotoc at runtime, see
