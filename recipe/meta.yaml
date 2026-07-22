@@ -75,7 +75,7 @@ outputs:
         - jsoncpp {{ jsoncpp }}
         - libabseil 20260526.0
         # requires abseil test targets to build with tests enabled
-        - libabseil-tests
+        - libabseil-tests 20260526.0
         - zlib {{ zlib }}
       run:
         - zlib       # bounds through run_exports
@@ -172,9 +172,9 @@ outputs:
       host:
         - gtest {{ gtest }}
         - jsoncpp {{ jsoncpp }}
-        - libabseil {{ libabseil }}
+        - libabseil 20260526.0
         # requires abseil test targets to build with tests enabled
-        - libabseil-tests {{ libabseil }}
+        - libabseil-tests 20260526.0
         - zlib {{ zlib }}
         - {{ pin_subpackage('libprotobuf', exact=True) }}
       run:
