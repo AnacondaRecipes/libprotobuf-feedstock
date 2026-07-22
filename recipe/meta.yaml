@@ -73,7 +73,7 @@ outputs:
       host:
         - gtest {{ gtest }}
         - jsoncpp {{ jsoncpp }}
-        - libabseil {{ libabseil }}
+        - libabseil 20260526.0
         # requires abseil test targets to build with tests enabled
         - libabseil-tests
         - zlib {{ zlib }}
